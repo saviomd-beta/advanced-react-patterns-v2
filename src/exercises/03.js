@@ -5,26 +5,41 @@ import {Switch} from '../switch'
 
 const ToggleContext = React.createContext()
 
+function ToggleConsumer(props) {
+  return (
+    <ToggleContext.Consumer>
+      {context => {
+        if (!context) {
+          throw new Error(
+            'Toggle compound components must be rendered within the Toggle component'
+          )
+        }
+        return props.children(context)
+      }}
+    </ToggleContext.Consumer>
+  )
+}
+
 class Toggle extends React.Component {
   static On = ({ children }) => (
-    <ToggleContext.Consumer>
+    <ToggleConsumer>
       { contextValue => (contextValue.on ? children : null) }
-    </ToggleContext.Consumer>
+    </ToggleConsumer>
   )
   static Off = ({ children }) => (
-    <ToggleContext.Consumer>
+    <ToggleConsumer>
       { contextValue => (contextValue.on ? null : children) }
-    </ToggleContext.Consumer>
+    </ToggleConsumer>
   )
   static Button = props => (
-    <ToggleContext.Consumer>
+    <ToggleConsumer>
       { contextValue => (
         <Switch
           on={contextValue.on}
           onClick={contextValue.toggle}
           {...props} />
       ) }
-    </ToggleContext.Consumer>
+    </ToggleConsumer>
   )
   state = {on: false}
   toggle = () =>
