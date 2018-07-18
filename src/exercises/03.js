@@ -41,17 +41,14 @@ class Toggle extends React.Component {
       ) }
     </ToggleConsumer>
   )
-  state = {on: false}
   toggle = () =>
     this.setState(
       ({on}) => ({on: !on}),
       () => this.props.onToggle(this.state.on),
     )
+  state = {on: false, toggle: this.toggle}
   render() {
-    return <ToggleContext.Provider value={ {
-      on: this.state.on,
-      toggle: this.toggle,
-    } }>{ this.props.children }</ToggleContext.Provider>
+    return <ToggleContext.Provider value={this.state}>{ this.props.children }</ToggleContext.Provider>
   }
 }
 
