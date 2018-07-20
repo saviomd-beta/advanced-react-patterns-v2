@@ -9,9 +9,16 @@ class Toggle extends React.Component {
     return this.props[prop] !== undefined
   }
   getState() {
-    return {
-      on: this.isControlled('on') ? this.props.on : this.state.on,
-    }
+    return Object.entries(this.state).reduce((combinedState, [key, value]) => {
+        if (this.isControlled(key)) {
+          combinedState[key] = this.props[key]
+        } else {
+          combinedState[key] = value
+        }
+        return combinedState
+      },
+      {},
+    )
   }
   toggle = () => {
     if (this.isControlled('on')) {
