@@ -4,12 +4,16 @@ import React from 'react'
 import {Switch} from '../switch'
 
 class Toggle extends React.Component {
+  static defaultProps = {
+    onToggle: () => {},
+    onStateChange: () => {},
+  }
   state = {on: false}
   isControlled(prop) {
     return this.props[prop] !== undefined
   }
-  getState() {
-    return Object.entries(this.state).reduce((combinedState, [key, value]) => {
+  getState(state = this.state) {
+    return Object.entries(state).reduce((combinedState, [key, value]) => {
         if (this.isControlled(key)) {
           combinedState[key] = this.props[key]
         } else {
@@ -20,17 +24,31 @@ class Toggle extends React.Component {
       {},
     )
   }
+  internalSetState(changes, callback) {
+    let allChanges
+    this.setState(state => {
+      const combinedState = this.getState(state)
+      const changesObject = typeof changes === 'function' ? changes(combinedState) : changes
+      allChanges = changesObject
+      const nonControlledChanges = Object.entries(changesObject).reduce((newChanges, [key, value]) => {
+        if (!this.isControlled(key)) {
+          newChanges[key] = value
+        }
+        return newChanges
+      }, {})
+      return Object.keys(nonControlledChanges).length ? nonControlledChanges : null
+    }, () => {
+      this.props.onStateChange(allChanges, this.getState())
+      callback()
+    })
+  }
   toggle = () => {
-    if (this.isControlled('on')) {
-      this.props.onToggle(!this.getState().on)
-    } else {
-      this.setState(
-        ({on}) => ({on: !on}),
-        () => {
-          this.props.onToggle(this.getState().on)
-        },
-      )
-    }
+    this.internalSetState(
+      ({on}) => ({on: !on}),
+      () => {
+        this.props.onToggle(this.getState().on)
+      },
+    )
   }
   render() {
     const {on} = this.getState()
@@ -40,7 +58,7 @@ class Toggle extends React.Component {
 
 class Usage extends React.Component {
   state = {bothOn: false}
-  handleToggle = on => {
+  handleStateChange = ({on}) => {
     this.setState({bothOn: on})
   }
   render() {
@@ -50,12 +68,12 @@ class Usage extends React.Component {
       <div>
         <Toggle
           on={bothOn}
-          onToggle={this.handleToggle}
+          onStateChange={this.handleStateChange}
           ref={toggle1Ref}
         />
         <Toggle
           on={bothOn}
-          onToggle={this.handleToggle}
+          onStateChange={this.handleStateChange}
           ref={toggle2Ref}
         />
       </div>
