@@ -31,7 +31,7 @@ function CommonToggle(props) {
 function Usage({
   onToggle = (...args) => console.log('onToggle', ...args),
 }) {
-  return <CommonToggle onToggle={onToggle} />
+  // return <CommonToggle onToggle={onToggle} />
   return (
     <Toggle onToggle={onToggle}>
       {({on, toggle}) => (
